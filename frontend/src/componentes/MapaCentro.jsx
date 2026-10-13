@@ -20,31 +20,46 @@ function ControladorPlano({ planta }) {
 }
 
 // Icono personalizado táctil accesible mediante SVG
-const crearIconoEspacio = (tipo, tieneIncidencia) => {
+const crearIconoEspacio = (espacio, tieneIncidencia) => {
   let colorFondo = '#3b82f6'; // Azul por defecto
-  let iconoTexto = '🚪';
+  let iconoTexto = '📚';     // Por defecto aula: libros
 
-  if (tipo === 'entrada') {
-    colorFondo = '#10b981';
+  const id = espacio.id || '';
+  const tipo = espacio.tipo || '';
+
+  if (id.includes('ACTOS') || tipo === 'actos') {
+    colorFondo = '#ec4899'; // Rosa para sala de actos
+    iconoTexto = '🎭';
+  } else if (id.includes('PATIO') || tipo === 'patio') {
+    colorFondo = '#15803d'; // Verde oscuro para patio exterior
+    iconoTexto = '🌳';
+  } else if (tipo === 'entrada') {
+    colorFondo = '#10b981'; // Verde para puertas y accesos
     iconoTexto = '🚪';
+  } else if (tipo === 'aula') {
+    colorFondo = '#2563eb'; // Azul intenso para aulas de clase
+    iconoTexto = '📚';
   } else if (tipo === 'ascensor') {
-    colorFondo = '#8b5cf6';
+    colorFondo = '#8b5cf6'; // Violeta para ascensor
     iconoTexto = '🛗';
   } else if (tipo === 'escalera') {
-    colorFondo = '#64748b';
+    colorFondo = '#64748b'; // Pizarra para escaleras
     iconoTexto = '🪜';
   } else if (tipo === 'direccion') {
-    colorFondo = '#0284c7';
+    colorFondo = '#0284c7'; // Azul institucional
     iconoTexto = '🏛️';
   } else if (tipo === 'gimnasio') {
-    colorFondo = '#f59e0b';
+    colorFondo = '#f59e0b'; // Ámbar para deporte
     iconoTexto = '🏀';
   } else if (tipo === 'bano') {
-    colorFondo = '#06b6d4';
+    colorFondo = '#06b6d4'; // Cian para aseos
     iconoTexto = '🚻';
+  } else if (tipo === 'pasillo') {
+    colorFondo = '#475569'; // Gris para pasillos
+    iconoTexto = '🚶';
   }
 
-  // Si tiene una incidencia activa, destacar en rojo
+  // Si tiene una incidencia activa, destacar en rojo de alerta
   if (tieneIncidencia) {
     colorFondo = '#ef4444';
     iconoTexto = '🚨';
@@ -182,7 +197,7 @@ export default function MapaCentro({ onSeleccionarEspacio }) {
               <Marker
                 key={espacio.id}
                 position={posicion}
-                icon={crearIconoEspacio(espacio.tipo, tieneIncidencia)}
+                icon={crearIconoEspacio(espacio, tieneIncidencia)}
               >
                 <Popup>
                   <div style={{ color: '#0f172a', padding: '4px', minWidth: '180px' }}>
