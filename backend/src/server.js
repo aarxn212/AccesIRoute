@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rutasEspacios from './rutas/espacios.js';
+import rutasConexiones from './rutas/conexiones.js';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 // Rutas
 app.use('/api/espacios', rutasEspacios);
+app.use('/api/conexiones', rutasConexiones);
 
 // Endpoint de comprobación
 app.get('/api/health', (req, res) => {
