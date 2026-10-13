@@ -94,15 +94,32 @@ ${idDestinoForzado ? `Destino fijado: ${idDestinoForzado}` : ''}
 ${soloAccesible ? 'Requisito: Movilidad reducida estricta (solo rutas accesibles).' : ''}
 `;
 
-  const respuesta = await ai.models.generateContent({
-    model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
-    contents: promptSistema,
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema: esquemaRespuestaRuta,
-      temperature: 0.1 // Baja temperatura para garantizar fidelidad al grafo sin inventar
-    }
-  });
+  const modelosAIntentar = [
+    process.env.GEMINI_MODEL || 'gemini-3.5-flash',
+    'gemini-3.7-flash',
+    'gemini-3.8-flash'
+  ];
 
-  return JSON.parse(respuesta.text);
+  let ultimoError = null;
+
+  for (const modelo of modelosAIntentar) {
+    try {
+      const respuesta = await ai.models.generateContent({
+        model: modelo,
+        contents: promptSistema,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: esquemaRespuestaRuta,
+          temperature: 0.1 // Baja temperatura para garantizar fidelidad al grafo sin inventar
+        }
+      });
+
+      return JSON.parse(respuesta.text);
+    } catch (error) {
+      console.warn(`Aviso: Error con modelo ${modelo}, probando siguiente alternativa...`, error.message);
+      ultimoError = error;
+    }
+  }
+
+  throw ultimoError || new Error('No se pudo calcular la ruta con ningún modelo de IA disponible');
 }
