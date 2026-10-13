@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import rutasEspacios from './rutas/espacios.js';
 import rutasConexiones from './rutas/conexiones.js';
 import rutasIncidencias from './rutas/incidencias.js';
+import rutasNavegacion from './rutas/rutas.js';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use('/api/espacios', rutasEspacios);
 app.use('/api/conexiones', rutasConexiones);
 app.use('/api/incidencias', rutasIncidencias);
+app.use('/api/rutas', rutasNavegacion);
 
 // Endpoint de comprobación
 app.get('/api/health', (req, res) => {
