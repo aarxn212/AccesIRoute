@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapContainer, Marker, Popup, CircleMarker, useMap } from 'react-leaflet';
+import { MapContainer, Marker, Popup, CircleMarker, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -95,7 +95,7 @@ const crearIconoEspacio = (espacio, tieneIncidencia) => {
   });
 };
 
-export default function MapaCentro({ onSeleccionarEspacio }) {
+export default function MapaCentro({ onSeleccionarEspacio, rutaActiva = [], onCargarEspacios }) {
   const [espacios, setEspacios] = useState([]);
   const [incidencias, setIncidencias] = useState([]);
   const [plantaSeleccionada, setPlantaSeleccionada] = useState(1); // 1 = Baja, 2 = Alta
@@ -109,6 +109,7 @@ export default function MapaCentro({ onSeleccionarEspacio }) {
     ])
       .then(([datosEspacios, datosIncidencias]) => {
         setEspacios(datosEspacios);
+        if (onCargarEspacios) onCargarEspacios(datosEspacios);
         setIncidencias(datosIncidencias);
         setCargando(false);
       })
@@ -116,12 +117,28 @@ export default function MapaCentro({ onSeleccionarEspacio }) {
         console.error('Error al cargar datos del mapa:', err);
         setCargando(false);
       });
-  }, []);
+  }, [onCargarEspacios]);
+
+  // Si se calcula una nueva ruta, sintonizar la planta del punto de inicio
+  useEffect(() => {
+    if (rutaActiva && rutaActiva.length > 0 && espacios.length > 0) {
+      const primerEspacio = espacios.find((e) => e.id === rutaActiva[0]);
+      if (primerEspacio && primerEspacio.planta) {
+        setPlantaSeleccionada(primerEspacio.planta);
+      }
+    }
+  }, [rutaActiva, espacios]);
 
   // Filtrar espacios según la planta activa en el selector
   const espaciosFiltrados = espacios.filter(
     (e) => e.planta === plantaSeleccionada && e.coord_x !== null && e.coord_y !== null
   );
+
+  // Coordenadas consecutivas para dibujar el camino en la planta activa
+  const coordenadasRutaEnPlanta = rutaActiva
+    .map((id) => espacios.find((e) => e.id === id))
+    .filter((e) => e && e.planta === plantaSeleccionada && e.coord_x !== null && e.coord_y !== null)
+    .map((e) => [e.coord_y, e.coord_x]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
@@ -190,6 +207,19 @@ export default function MapaCentro({ onSeleccionarEspacio }) {
 
           {/* Rejilla de referencia y contornos de los 4 bloques */}
           <CircleMarker center={[500, 500]} radius={8} pathOptions={{ color: '#3b82f6', fillOpacity: 0.2 }} />
+
+          {/* Trazado de ruta generado por la IA en la planta activa */}
+          {coordenadasRutaEnPlanta.length > 1 && (
+            <Polyline
+              positions={coordenadasRutaEnPlanta}
+              pathOptions={{
+                color: '#38bdf8',
+                weight: 8,
+                opacity: 0.95,
+                dashArray: '8, 12'
+              }}
+            />
+          )}
 
           {/* Marcadores de los espacios en la planta activa */}
           {espaciosFiltrados.map((espacio) => {
