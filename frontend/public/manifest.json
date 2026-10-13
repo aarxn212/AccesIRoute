@@ -1,0 +1,18 @@
+{
+  "name": "AccessiRoute - Navegación Accesible",
+  "short_name": "AccessiRoute",
+  "description": "Sistema de orientación y rutas accesibles para paneles táctiles del centro educativo",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
