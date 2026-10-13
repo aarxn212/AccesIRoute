@@ -24,8 +24,8 @@ INSERT INTO espacios (id, nombre, bloque, planta, tipo, es_accesible, coord_x, c
 ('A-P1-AULA-10', 'Aula A-10', 'A', 1, 'aula', true, 860, 220),
 ('A-P1-ESCALERA', 'Escalera Bloque A (Planta 1)', 'A', 1, 'escalera', false, 500, 220),
 ('A-P1-ASCENSOR', 'Ascensor Bloque A (Planta 1)', 'A', 1, 'ascensor', true, 540, 220),
-('A-P1-BANO-H', 'Baño Hombres Bloque A (Planta 1)', 'A', 1, 'bano', true, 460, 220),
-('A-P1-BANO-M', 'Baño Mujeres Bloque A (Planta 1)', 'A', 1, 'bano', true, 540, 220),
+('A-P1-BANO-H', 'Baño Hombres Bloque A (Planta 1)', 'A', 1, 'bano', true, 630, 280),
+('A-P1-BANO-M', 'Baño Mujeres Bloque A (Planta 1)', 'A', 1, 'bano', true, 670, 280),
 
 -- =====================================================
 -- BLOQUE A - PLANTA 2 (Alta)
@@ -116,10 +116,6 @@ INSERT INTO conexiones (id_espacio_origen, id_espacio_destino, tipo_conexion, es
 ('A-P1-ESCALERA', 'A-P1-ENTRADA', 'pasillo', true),
 ('A-P1-ENTRADA', 'A-P1-ASCENSOR', 'pasillo', true),
 ('A-P1-ASCENSOR', 'A-P1-ENTRADA', 'pasillo', true),
-('A-P1-ESCALERA', 'A-P1-BANO-H', 'puerta', true),
-('A-P1-BANO-H', 'A-P1-ESCALERA', 'puerta', true),
-('A-P1-ESCALERA', 'A-P1-BANO-M', 'puerta', true),
-('A-P1-BANO-M', 'A-P1-ESCALERA', 'puerta', true),
 
 -- Bloque A - Pasillo Izquierda PB (Aulas 1 a 5)
 ('A-P1-ENTRADA', 'A-P1-PASILLO-IZQ', 'pasillo', true),
@@ -148,6 +144,10 @@ INSERT INTO conexiones (id_espacio_origen, id_espacio_destino, tipo_conexion, es
 ('A-P1-AULA-09', 'A-P1-PASILLO-DER', 'puerta', true),
 ('A-P1-PASILLO-DER', 'A-P1-AULA-10', 'puerta', true),
 ('A-P1-AULA-10', 'A-P1-PASILLO-DER', 'puerta', true),
+('A-P1-PASILLO-DER', 'A-P1-BANO-H', 'puerta', true),
+('A-P1-BANO-H', 'A-P1-PASILLO-DER', 'puerta', true),
+('A-P1-PASILLO-DER', 'A-P1-BANO-M', 'puerta', true),
+('A-P1-BANO-M', 'A-P1-PASILLO-DER', 'puerta', true),
 
 -- Bloque A - Conexiones Verticales (P1 <-> P2)
 ('A-P1-ESCALERA', 'A-P2-ESCALERA', 'escalera', false), -- ¡Barrera para silla de ruedas!
