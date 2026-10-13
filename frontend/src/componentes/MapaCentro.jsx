@@ -51,8 +51,14 @@ const crearIconoEspacio = (espacio, tieneIncidencia) => {
   } else if (tipo === 'gimnasio') {
     colorFondo = '#f59e0b'; // Ámbar para deporte
     iconoTexto = '🏀';
+  } else if (id.includes('BANO-H')) {
+    colorFondo = '#0284c7'; // Azul cian para baño hombres
+    iconoTexto = '🚹';
+  } else if (id.includes('BANO-M')) {
+    colorFondo = '#db2777'; // Rosa fucsia para baño mujeres
+    iconoTexto = '🚺';
   } else if (tipo === 'bano') {
-    colorFondo = '#06b6d4'; // Cian para aseos
+    colorFondo = '#06b6d4'; // Cian para aseos neutros/generales
     iconoTexto = '🚻';
   } else if (tipo === 'pasillo') {
     colorFondo = '#475569'; // Gris para pasillos

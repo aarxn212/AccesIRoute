@@ -24,6 +24,8 @@ INSERT INTO espacios (id, nombre, bloque, planta, tipo, es_accesible, coord_x, c
 ('A-P1-AULA-10', 'Aula A-10', 'A', 1, 'aula', true, 860, 220),
 ('A-P1-ESCALERA', 'Escalera Bloque A (Planta 1)', 'A', 1, 'escalera', false, 500, 220),
 ('A-P1-ASCENSOR', 'Ascensor Bloque A (Planta 1)', 'A', 1, 'ascensor', true, 540, 220),
+('A-P1-BANO-H', 'Baño Hombres Bloque A (Planta 1)', 'A', 1, 'bano', true, 460, 260),
+('A-P1-BANO-M', 'Baño Mujeres Bloque A (Planta 1)', 'A', 1, 'bano', true, 540, 260),
 
 -- =====================================================
 -- BLOQUE A - PLANTA 2 (Alta)
@@ -31,6 +33,8 @@ INSERT INTO espacios (id, nombre, bloque, planta, tipo, es_accesible, coord_x, c
 ('A-P2-HALL', 'Distribuidor Central Bloque A (Planta 2)', 'A', 2, 'pasillo', true, 500, 220),
 ('A-P2-ESCALERA', 'Escalera Bloque A (Planta 2)', 'A', 2, 'escalera', false, 500, 220),
 ('A-P2-ASCENSOR', 'Ascensor Bloque A (Planta 2)', 'A', 2, 'ascensor', true, 540, 220),
+('A-P2-BANO-H', 'Baño Hombres Bloque A (Planta 2)', 'A', 2, 'bano', true, 460, 260),
+('A-P2-BANO-M', 'Baño Mujeres Bloque A (Planta 2)', 'A', 2, 'bano', true, 540, 260),
 ('A-P2-PASILLO-IZQ', 'Pasillo Izquierda (Planta 2)', 'A', 2, 'pasillo', true, 350, 220),
 ('A-P2-AULA-11', 'Aula A-11', 'A', 2, 'aula', true, 300, 180),
 ('A-P2-AULA-12', 'Aula A-12', 'A', 2, 'aula', true, 260, 180),
@@ -111,6 +115,10 @@ INSERT INTO conexiones (id_espacio_origen, id_espacio_destino, tipo_conexion, es
 ('A-P1-ESCALERA', 'A-P1-ENTRADA', 'pasillo', true),
 ('A-P1-ENTRADA', 'A-P1-ASCENSOR', 'pasillo', true),
 ('A-P1-ASCENSOR', 'A-P1-ENTRADA', 'pasillo', true),
+('A-P1-ENTRADA', 'A-P1-BANO-H', 'puerta', true),
+('A-P1-BANO-H', 'A-P1-ENTRADA', 'puerta', true),
+('A-P1-ENTRADA', 'A-P1-BANO-M', 'puerta', true),
+('A-P1-BANO-M', 'A-P1-ENTRADA', 'puerta', true),
 
 -- Bloque A - Pasillo Izquierda PB (Aulas 1 a 5)
 ('A-P1-ENTRADA', 'A-P1-PASILLO-IZQ', 'pasillo', true),
@@ -151,6 +159,10 @@ INSERT INTO conexiones (id_espacio_origen, id_espacio_destino, tipo_conexion, es
 ('A-P2-HALL', 'A-P2-ESCALERA', 'pasillo', true),
 ('A-P2-ASCENSOR', 'A-P2-HALL', 'pasillo', true),
 ('A-P2-HALL', 'A-P2-ASCENSOR', 'pasillo', true),
+('A-P2-HALL', 'A-P2-BANO-H', 'puerta', true),
+('A-P2-BANO-H', 'A-P2-HALL', 'puerta', true),
+('A-P2-HALL', 'A-P2-BANO-M', 'puerta', true),
+('A-P2-BANO-M', 'A-P2-HALL', 'puerta', true),
 
 -- Bloque A - Pasillo Izquierda P2 (Aulas 11 a 15)
 ('A-P2-HALL', 'A-P2-PASILLO-IZQ', 'pasillo', true),
