@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import MapaCentro from './componentes/MapaCentro';
 
 function App() {
   const [conexionApi, setConexionApi] = useState('Verificando...');
+  const [espacioSeleccionado, setEspacioSeleccionado] = useState(null);
 
   useEffect(() => {
     // Comprobar la conexión con el backend
@@ -12,53 +14,82 @@ function App() {
   }, []);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Barra superior de quiosco táctil */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+      {/* Barra superior del quiosco táctil */}
       <header className="barra-superior" role="banner">
         <div className="marca-app">
           <span aria-hidden="true">♿</span>
           <span>AccessiRoute</span>
           <span className="marca-badge">Panel Táctil</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '0.9rem', color: 'var(--texto-atenuado)' }}>
-            Estado API: <strong style={{ color: conexionApi.includes('Conectado') ? 'var(--color-accesible)' : 'var(--color-alerta)' }}>{conexionApi}</strong>
-          </span>
+
+        {/* Botones de acción rápida con ergonomía táctil */}
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button type="button" className="boton-tactil boton-primario" aria-label="Buscar ruta accesible">
+            <span aria-hidden="true">🗺️</span>
+            <span>Rutas</span>
+          </button>
+
+          <button type="button" className="boton-tactil boton-reportar" aria-label="Reportar incidencia rápida">
+            <span aria-hidden="true">🚨</span>
+            <span>Reportar</span>
+          </button>
         </div>
       </header>
 
-      {/* Área principal del panel */}
-      <main style={{ flex: 1, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <section style={{
-          flex: 1,
-          backgroundColor: 'var(--fondo-superficie)',
-          borderRadius: 'var(--radio-borde)',
-          border: '1px solid var(--borde-suave)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '30px',
-          textAlign: 'center'
-        }}>
-          <h1 style={{ fontSize: '2rem', marginBottom: '16px' }}>Terminal de Orientación Escolar</h1>
-          <p style={{ maxWidth: '600px', color: 'var(--texto-secundario)', marginBottom: '32px' }}>
-            Bienvenido al panel interactivo de AccessiRoute. Aquí se mostrará el plano interactivo de los 4 bloques del centro con rutas adaptadas e incidencias en tiempo real.
-          </p>
+      {/* Contenedor principal: Mapa interactivo a pantalla completa */}
+      <main style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        <MapaCentro onSeleccionarEspacio={(espacio) => setEspacioSeleccionado(espacio)} />
 
-          {/* Botones de acción rápida con ergonomía táctil */}
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <button type="button" className="boton-tactil boton-primario" aria-label="Consultar rutas">
-              <span aria-hidden="true">🗺️</span>
-              <span>Buscar Ruta</span>
-            </button>
+        {/* Tarjeta inferior informativa cuando se pulsa un aula o espacio */}
+        {espacioSeleccionado && (
+          <aside
+            aria-label="Información del espacio seleccionado"
+            style={{
+              position: 'absolute',
+              bottom: '24px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 1000,
+              backgroundColor: 'var(--fondo-superficie)',
+              border: '2px solid var(--color-primario)',
+              borderRadius: 'var(--radio-borde)',
+              padding: '16px 24px',
+              boxShadow: 'var(--sombra-panel)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '24px',
+              maxWidth: '90%',
+              minWidth: '320px'
+            }}
+          >
+            <div>
+              <h2 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--texto-principal)' }}>
+                {espacioSeleccionado.nombre}
+              </h2>
+              <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: 'var(--texto-secundario)' }}>
+                Bloque {espacioSeleccionado.bloque} • Planta {espacioSeleccionado.planta} • {espacioSeleccionado.tipo}
+              </p>
+            </div>
 
-            <button type="button" className="boton-tactil boton-reportar" aria-label="Reportar una incidencia">
-              <span aria-hidden="true">🚨</span>
-              <span>Reportar Incidencia</span>
-            </button>
-          </div>
-        </section>
+            <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+              <button
+                type="button"
+                onClick={() => setEspacioSeleccionado(null)}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: 'var(--texto-atenuado)',
+                  border: '1px solid var(--borde-suave)',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cerrar
+              </button>
+            </div>
+          </aside>
+        )}
       </main>
     </div>
   );
