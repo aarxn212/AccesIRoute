@@ -13,11 +13,11 @@ En los centros educativos actuales, el uso de teléfonos móviles personales est
 **AccessiRoute** es una **PWA (Progressive Web App)** diseñada para ejecutarse en **paneles y terminales táctiles fijados en las paredes** de los pasillos y entradas del centro educativo.
 
 El sistema integra:
-* 🗺️ **Plano de interiores interactivo:** Navegación táctil intuitiva tipo "Google Maps" adaptada al plano del centro.
-* ♿ **Accesibilidad universal como núcleo:** Rutas dinámicas que discriminan barreras arquitectónicas (escaleras vs. ascensores y rampas).
-* 🚨 **Gestión colaborativa de incidencias (estilo Waze):** Cualquier usuario puede reportar en segundos un obstáculo, puerta cerrada o ascensor averiado colocando un marcador sobre el plano.
-* 🤖 **Motor de rutas asistido por IA (Gemini API):** Interpreta peticiones en lenguaje natural y devuelve rutas estructuradas respetando el grafo y las restricciones de accesibilidad activas.
-* 🎤 **Interacción por voz (Web Speech API):** Permite a los usuarios solicitar indicaciones hablando directamente al panel táctil sin necesidad de teclear.
+* **Plano de interiores interactivo:** Navegación táctil intuitiva tipo "Google Maps" adaptada al plano del centro.
+* **Accesibilidad universal como núcleo:** Rutas dinámicas que discriminan barreras arquitectónicas (escaleras vs. ascensores y rampas).
+* **Gestión colaborativa de incidencias (estilo Waze):** Cualquier usuario puede reportar en segundos un obstáculo, puerta cerrada o ascensor averiado colocando un marcador sobre el plano.
+* **Motor de rutas asistido por IA (Gemini API):** Interpreta peticiones en lenguaje natural y devuelve rutas estructuradas respetando el grafo y las restricciones de accesibilidad activas.
+* **Interacción por voz (Web Speech API):** Permite a los usuarios solicitar indicaciones hablando directamente al panel táctil sin necesidad de teclear.
 
 ---
 
@@ -34,10 +34,10 @@ Para garantizar la viabilidad y calidad técnica de un proyecto individual en ap
 
 ### 2.2. Exclusiones Explícitas (Fuera de Alcance del MVP)
 Para evitar desviaciones de tiempo:
-* ❌ No se utilizan sistemas GPS exteriores ni cartografía de ciudad (no aplican en interiores).
-* ❌ No se requiere login previo para consultar rutas o reportar incidencias (enfoque de quiosco público rápido).
-* ❌ No se entrena un modelo de IA desde cero; se aprovechan APIs fundacionales con salida JSON estructurada.
-* ❌ No se implementan redes sociales, valoraciones ni chats internos.
+* No se utilizan sistemas GPS exteriores ni cartografía de ciudad (no aplican en interiores).
+* No se requiere login previo para consultar rutas o reportar incidencias (enfoque de quiosco público rápido).
+* No se entrena un modelo de IA desde cero; se aprovechan APIs fundacionales con salida JSON estructurada.
+* No se implementan redes sociales, valoraciones ni chats internos.
 
 ### 2.3. Cronograma del Proyecto por Fases
 ```mermaid
@@ -89,7 +89,7 @@ sequenceDiagram
 
 ### 3.3. Flujo Rápido de Incidencias (Estilo Waze)
 Para paneles de pared, la agilidad es primordial:
-1. El usuario pulsa el botón flotante destacado: **🚨 REPORTAR**.
+1. El usuario pulsa el botón flotante destacado: **REPORTAR**.
 2. Selecciona el tipo de incidencia mediante botones táctiles de gran tamaño (*Obstáculo, Ascensor, Puerta, Rampa, Paso Bloqueado, Otro*).
 3. El plano entra en modo selección: el usuario arrastra con el dedo y coloca el marcador sobre el punto exacto.
 4. Pulsa **Confirmar**.

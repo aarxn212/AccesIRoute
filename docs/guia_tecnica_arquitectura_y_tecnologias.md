@@ -170,15 +170,15 @@ Los servicios cartográficos habituales (Google Maps, Mapbox) utilizan proyeccio
 
 #### Diferenciación visual de espacios por iconos accesibles:
 Para garantizar que personas con dificultades cognitivas o de lectura comprendan el mapa rápidamente, cada tipo de espacio posee un icono y color semántico único:
-- **Aulas de clase**: 📚 Azul (`#2563eb`)
-- **Puertas y accesos**: 🚪 Verde esmeralda (`#10b981`)
-- **Aseos Hombres**: 🚹 Azul cian (`#0284c7`)
-- **Aseos Mujeres**: 🚺 Rosa fucsia (`#db2777`)
-- **Ascensores**: 🛗 Violeta (`#8b5cf6`)
-- **Escaleras**: 🪜 Pizarra (`#64748b`)
-- **Patio exterior**: 🌳 Verde naturaleza (`#15803d`)
-- **Sala de Actos**: 🎭 Rosa (`#ec4899`)
-- **Incidencias activas**: ⚠️ / 🚨 Rojo peligro pulsante (`#ef4444`)
+- **Aulas de clase**: Azul (`#2563eb`)
+- **Puertas y accesos**: Verde esmeralda (`#10b981`)
+- **Aseos Hombres**: Azul cian (`#0284c7`)
+- **Aseos Mujeres**: Rosa fucsia (`#db2777`)
+- **Ascensores**: Violeta (`#8b5cf6`)
+- **Escaleras**: Pizarra (`#64748b`)
+- **Patio exterior**: Verde naturaleza (`#15803d`)
+- **Sala de Actos**: Rosa (`#ec4899`)
+- **Incidencias activas**: Rojo peligro pulsante (`#ef4444`)
 
 ---
 
@@ -188,12 +188,12 @@ Para garantizar que personas con dificultades cognitivas o de lectura comprendan
 **React (JSX)** en el cliente y **Express + PostgreSQL** en el servidor.
 
 #### Flujo paso a paso de un reporte táctil:
-1. El usuario pulsa el botón **🚨 Reportar** en la barra superior del quiosco.
+1. El usuario pulsa el botón **Reportar** en la barra superior del quiosco.
 2. Se abre el diálogo accesible [ModalReportar.jsx](file:///home/ajandaoui/DAW/Projecto/frontend/src/componentes/ModalReportar.jsx) con 6 botones táctiles de 64 px de altura: *Obstáculo*, *Ascensor*, *Puerta*, *Rampa*, *Paso Bloqueado* u *Otro*.
 3. Al seleccionar un tipo, el mapa entra en **Modo Reporte Activo**:
-   - Aparece un banner superior rojo: *"🚨 MODO REPORTE: Toca el plano para situar: [tipo]"*.
+   - Aparece un banner superior rojo: *"MODO REPORTE: Toca el plano para situar: [tipo]"*.
    - El componente `DetectorDeToques` captura el evento `click` o `touchstart` sobre el mapa usando el hook `useMapEvents` de Leaflet.
-   - Se sitúa inmediatamente una chincheta roja temporal (📍).
+   - Se sitúa inmediatamente una chincheta roja temporal.
    - El frontend calcula mediante distancia euclidiana cuál es el espacio registrado más cercano al punto pulsado:
      $$\text{distancia} = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$$
 4. Aparece una barra flotante inferior que muestra las coordenadas exactas y el aula más próxima.

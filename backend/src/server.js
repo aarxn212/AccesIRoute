@@ -31,5 +31,5 @@ app.get('/api/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor AccessiRoute escuchando en http://localhost:${PORT}`);
+  console.log(`Servidor AccessiRoute escuchando en http://localhost:${PORT}`);
 });

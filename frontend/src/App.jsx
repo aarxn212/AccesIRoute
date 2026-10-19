@@ -52,7 +52,7 @@ function App() {
       setModoReporte(false);
       setTipoIncidenciaAReportar(null);
       setActualizadorIncidencias((prev) => prev + 1);
-      setNotificacion('✅ Incidencia reportada con éxito y añadida al mapa.');
+      setNotificacion('Incidencia reportada con éxito y añadida al mapa.');
       setTimeout(() => setNotificacion(null), 5000);
     } catch (err) {
       console.error('Error al reportar incidencia:', err);
@@ -70,7 +70,6 @@ function App() {
       {/* Barra superior del quiosco táctil */}
       <header className="barra-superior" role="banner">
         <div className="marca-app">
-          <span aria-hidden="true">♿</span>
           <span>AccessiRoute</span>
           <span className="marca-badge">Panel Táctil</span>
         </div>
@@ -83,7 +82,6 @@ function App() {
             className="boton-tactil boton-primario"
             aria-label="Buscar ruta asistida por IA"
           >
-            <span aria-hidden="true">🗺️</span>
             <span>Rutas</span>
           </button>
 
@@ -93,7 +91,6 @@ function App() {
             className="boton-tactil boton-reportar"
             aria-label="Reportar incidencia rápida"
           >
-            <span aria-hidden="true">🚨</span>
             <span>Reportar</span>
           </button>
         </div>
@@ -135,7 +132,7 @@ function App() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontWeight: 700, color: 'var(--color-primario)', fontSize: '0.95rem' }}>
-                🤖 RUTA ASISTIDA POR GEMINI
+                RUTA ASISTIDA POR GEMINI
               </span>
               <button
                 type="button"
@@ -148,7 +145,7 @@ function App() {
                   fontWeight: 600
                 }}
               >
-                ✕ Limpiar
+                Limpiar
               </button>
             </div>
 
@@ -165,13 +162,13 @@ function App() {
                 fontSize: '0.85rem',
                 color: '#fca5a5'
               }}>
-                ⚠️ <strong>Se evitaron barreras:</strong> {resultadoRuta.barreras_evitadas.join(', ')}
+                <strong>Se evitaron barreras:</strong> {resultadoRuta.barreras_evitadas.join(', ')}
               </div>
             )}
 
             {resultadoRuta.ruta && resultadoRuta.ruta.length > 0 && (
               <div style={{ fontSize: '0.8rem', color: 'var(--texto-atenuado)' }}>
-                <strong>Itinerario:</strong> {resultadoRuta.ruta.join(' ➔ ')}
+                <strong>Itinerario:</strong> {resultadoRuta.ruta.join(' -> ')}
               </div>
             )}
           </aside>

@@ -77,7 +77,7 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 id="titulo-modal-ruta" style={{ fontSize: '1.5rem', margin: 0, color: 'var(--texto-principal)' }}>
-            🗺️ Buscar Ruta con IA
+            Buscar Ruta con IA
           </h2>
           <button
             type="button"
@@ -92,7 +92,7 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
               padding: '8px'
             }}
           >
-            ✕
+            Cerrar
           </button>
         </div>
 
@@ -108,7 +108,7 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
               fontSize: '0.95rem'
             }}
           >
-            ⚠️ {error}
+            {error}
           </div>
         )}
 
@@ -215,7 +215,7 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
               style={{ width: '24px', height: '24px', cursor: 'pointer' }}
             />
             <span style={{ fontSize: '1rem', fontWeight: 600 }}>
-              ♿ Ruta accesible (Silla de ruedas / Sin escaleras)
+              Ruta accesible (Silla de ruedas / Sin escaleras)
             </span>
           </label>
 
@@ -253,12 +253,9 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
               }}
             >
               {cargando ? (
-                <span>🤖 Consultando a la IA...</span>
+                <span>Consultando a la IA...</span>
               ) : (
-                <>
-                  <span aria-hidden="true">🚀</span>
-                  <span>Calcular Ruta</span>
-                </>
+                <span>Calcular Ruta</span>
               )}
             </button>
           </div>

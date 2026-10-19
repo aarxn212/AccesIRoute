@@ -45,11 +45,10 @@ const iconoChinchetaReporte = L.divIcon({
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
       box-shadow: 0 0 25px rgba(239, 68, 68, 1);
       border: 3px solid #ffffff;
     ">
-      📍
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
     </div>
   `,
   iconSize: [44, 44],
@@ -67,11 +66,10 @@ const iconoMarcadorIncidencia = L.divIcon({
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
       box-shadow: 0 0 14px rgba(239, 68, 68, 0.9);
       border: 2px solid #ffffff;
     ">
-      ⚠️
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
     </div>
   `,
   iconSize: [32, 32],
@@ -250,7 +248,7 @@ export default function MapaCentro({
           gap: '10px',
           border: '2px solid #ffffff'
         }}>
-          <span>🚨 MODO REPORTE:</span>
+          <span style={{ letterSpacing: '0.05em' }}>MODO REPORTE:</span>
           <span style={{ fontWeight: 500, textTransform: 'capitalize' }}>
             Toca el plano para situar: <strong>{tipoIncidenciaAReportar?.replace('_', ' ') || 'incidencia'}</strong>
           </span>
@@ -371,7 +369,7 @@ export default function MapaCentro({
                       textTransform: 'uppercase',
                       marginBottom: '6px'
                     }}>
-                      🚨 Incidencia Activa
+                      Incidencia Activa
                     </div>
                     <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', textTransform: 'capitalize' }}>
                       {inc.tipo.replace('_', ' ')}
@@ -410,7 +408,7 @@ export default function MapaCentro({
                       <strong>Bloque:</strong> {espacio.bloque} | <strong>Planta:</strong> {espacio.planta}
                     </p>
                     <p style={{ margin: '0 0 10px 0', fontSize: '0.85rem' }}>
-                      {espacio.es_accesible ? '♿ Espacio Accesible' : '⚠️ Sin acceso adaptado'}
+                      {espacio.es_accesible ? 'Espacio Accesible' : 'Sin acceso adaptado'}
                     </p>
 
                     {tieneIncidencia && (
@@ -423,7 +421,7 @@ export default function MapaCentro({
                         fontWeight: 600,
                         marginBottom: '8px'
                       }}>
-                        🚨 Incidencia activa reportada
+                        Incidencia activa reportada
                       </div>
                     )}
 
@@ -476,8 +474,8 @@ export default function MapaCentro({
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, color: 'var(--color-peligro)', fontSize: '1.05rem' }}>
               {puntoReporte
-                ? `📍 Chincheta fijada en (${puntoReporte.coord_x}, ${puntoReporte.coord_y})`
-                : '👉 Toca la pantalla táctil en el punto exacto'}
+                ? `Ubicación fijada en (${puntoReporte.coord_x}, ${puntoReporte.coord_y})`
+                : 'Toca la pantalla táctil en el punto exacto'}
             </div>
             <div style={{ fontSize: '0.85rem', color: 'var(--texto-secundario)', marginTop: '4px' }}>
               {puntoReporte && espacioCercano

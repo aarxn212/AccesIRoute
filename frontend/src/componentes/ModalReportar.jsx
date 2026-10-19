@@ -2,12 +2,12 @@ export default function ModalReportar({ abierto, onCerrar, onSeleccionarTipo }) 
   if (!abierto) return null;
 
   const TIPOS_INCIDENCIA = [
-    { id: 'obstaculo', nombre: 'Obstáculo', icono: '🚧', color: '#ea580c' },
-    { id: 'ascensor', nombre: 'Ascensor', icono: '🛗', color: '#8b5cf6' },
-    { id: 'puerta', nombre: 'Puerta', icono: '🚪', color: '#10b981' },
-    { id: 'rampa', nombre: 'Rampa', icono: '♿', color: '#0284c7' },
-    { id: 'paso_bloqueado', nombre: 'Paso Bloqueado', icono: '🚫', color: '#ef4444' },
-    { id: 'otro', nombre: 'Otro', icono: '⚠️', color: '#f59e0b' }
+    { id: 'obstaculo', nombre: 'Obstáculo', color: '#ea580c' },
+    { id: 'ascensor', nombre: 'Ascensor', color: '#8b5cf6' },
+    { id: 'puerta', nombre: 'Puerta', color: '#10b981' },
+    { id: 'rampa', nombre: 'Rampa', color: '#0284c7' },
+    { id: 'paso_bloqueado', nombre: 'Paso Bloqueado', color: '#ef4444' },
+    { id: 'otro', nombre: 'Otro', color: '#f59e0b' }
   ];
 
   return (
@@ -44,7 +44,7 @@ export default function ModalReportar({ abierto, onCerrar, onSeleccionarTipo }) 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h2 id="titulo-modal-reportar" style={{ fontSize: '1.4rem', margin: 0, color: 'var(--texto-principal)' }}>
-              🚨 Reportar Incidencia (Estilo Waze)
+              Reportar Incidencia
             </h2>
             <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: 'var(--texto-secundario)' }}>
               Selecciona el tipo y luego coloca el marcador con el dedo en el plano
@@ -63,7 +63,7 @@ export default function ModalReportar({ abierto, onCerrar, onSeleccionarTipo }) 
               padding: '8px'
             }}
           >
-            ✕
+            Cerrar
           </button>
         </div>
 
@@ -89,7 +89,14 @@ export default function ModalReportar({ abierto, onCerrar, onSeleccionarTipo }) 
                 borderRadius: '12px'
               }}
             >
-              <span style={{ fontSize: '1.7rem' }} aria-hidden="true">{t.icono}</span>
+              <span style={{
+                width: '16px',
+                height: '16px',
+                borderRadius: '50%',
+                backgroundColor: t.color,
+                display: 'inline-block',
+                boxShadow: `0 0 8px ${t.color}`
+              }} aria-hidden="true" />
               <span style={{ fontWeight: 700 }}>{t.nombre}</span>
             </button>
           ))}
