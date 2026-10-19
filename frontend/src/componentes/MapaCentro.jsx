@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapContainer, Marker, Popup, CircleMarker, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, Marker, Popup, CircleMarker, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -18,6 +18,66 @@ function ControladorPlano({ planta }) {
   }, [planta, map]);
   return null;
 }
+
+// Detector táctil para colocar la chincheta en modo reporte
+function DetectorDeToques({ modoReporte, onCoordenadasSeleccionadas }) {
+  useMapEvents({
+    click(e) {
+      if (modoReporte) {
+        onCoordenadasSeleccionadas({
+          coord_y: Math.round(e.latlng.lat),
+          coord_x: Math.round(e.latlng.lng)
+        });
+      }
+    }
+  });
+  return null;
+}
+
+const iconoChinchetaReporte = L.divIcon({
+  className: 'chincheta-temporal',
+  html: `
+    <div style="
+      background-color: #ef4444;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 1);
+      border: 3px solid #ffffff;
+    ">
+      📍
+    </div>
+  `,
+  iconSize: [44, 44],
+  iconAnchor: [22, 22]
+});
+
+const iconoMarcadorIncidencia = L.divIcon({
+  className: 'icono-marcador-incidencia',
+  html: `
+    <div style="
+      background-color: #ef4444;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.9);
+      border: 2px solid #ffffff;
+    ">
+      ⚠️
+    </div>
+  `,
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -16]
+});
 
 // Icono personalizado táctil accesible mediante SVG
 const crearIconoEspacio = (espacio, tieneIncidencia) => {
@@ -95,11 +155,21 @@ const crearIconoEspacio = (espacio, tieneIncidencia) => {
   });
 };
 
-export default function MapaCentro({ onSeleccionarEspacio, rutaActiva = [], onCargarEspacios }) {
+export default function MapaCentro({
+  onSeleccionarEspacio,
+  rutaActiva = [],
+  onCargarEspacios,
+  modoReporte = false,
+  tipoIncidenciaAReportar = null,
+  onConfirmarReporte,
+  onCancelarReporte,
+  actualizadorIncidencias = 0
+}) {
   const [espacios, setEspacios] = useState([]);
   const [incidencias, setIncidencias] = useState([]);
   const [plantaSeleccionada, setPlantaSeleccionada] = useState(1); // 1 = Baja, 2 = Alta
   const [cargando, setCargando] = useState(true);
+  const [puntoReporte, setPuntoReporte] = useState(null); // { coord_x, coord_y }
 
   // Cargar espacios e incidencias desde la API REST
   useEffect(() => {
@@ -117,7 +187,14 @@ export default function MapaCentro({ onSeleccionarEspacio, rutaActiva = [], onCa
         console.error('Error al cargar datos del mapa:', err);
         setCargando(false);
       });
-  }, [onCargarEspacios]);
+  }, [onCargarEspacios, actualizadorIncidencias]);
+
+  // Limpiar punto al salir del modo reporte
+  useEffect(() => {
+    if (!modoReporte) {
+      setPuntoReporte(null);
+    }
+  }, [modoReporte]);
 
   // Si se calcula una nueva ruta, sintonizar la planta del punto de inicio
   useEffect(() => {
@@ -134,6 +211,17 @@ export default function MapaCentro({ onSeleccionarEspacio, rutaActiva = [], onCa
     (e) => e.planta === plantaSeleccionada && e.coord_x !== null && e.coord_y !== null
   );
 
+  // Espacio más cercano a la chincheta pulsada
+  const espacioCercano = puntoReporte
+    ? espaciosFiltrados.reduce((masCercano, esp) => {
+        const dist = Math.hypot(esp.coord_x - puntoReporte.coord_x, esp.coord_y - puntoReporte.coord_y);
+        if (!masCercano || dist < masCercano.dist) {
+          return { espacio: esp, dist };
+        }
+        return masCercano;
+      }, null)
+    : null;
+
   // Coordenadas consecutivas para dibujar el camino en la planta activa
   const coordenadasRutaEnPlanta = rutaActiva
     .map((id) => espacios.find((e) => e.id === id))
@@ -142,6 +230,33 @@ export default function MapaCentro({ onSeleccionarEspacio, rutaActiva = [], onCa
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
+      {/* Banner superior informativo si estamos en modo reporte */}
+      {modoReporte && (
+        <div style={{
+          position: 'absolute',
+          top: '16px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1000,
+          backgroundColor: '#dc2626',
+          color: '#ffffff',
+          padding: '10px 24px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+          fontWeight: 700,
+          fontSize: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          border: '2px solid #ffffff'
+        }}>
+          <span>🚨 MODO REPORTE:</span>
+          <span style={{ fontWeight: 500, textTransform: 'capitalize' }}>
+            Toca el plano para situar: <strong>{tipoIncidenciaAReportar?.replace('_', ' ') || 'incidencia'}</strong>
+          </span>
+        </div>
+      )}
+
       {/* Selector táctil de plantas flotante */}
       <div style={{
         position: 'absolute',
@@ -205,6 +320,20 @@ export default function MapaCentro({ onSeleccionarEspacio, rutaActiva = [], onCa
         >
           <ControladorPlano planta={plantaSeleccionada} />
 
+          {/* Detector de toques para colocar la chincheta */}
+          <DetectorDeToques
+            modoReporte={modoReporte}
+            onCoordenadasSeleccionadas={(c) => setPuntoReporte(c)}
+          />
+
+          {/* Chincheta temporal en modo reporte */}
+          {modoReporte && puntoReporte && (
+            <Marker
+              position={[puntoReporte.coord_y, puntoReporte.coord_x]}
+              icon={iconoChinchetaReporte}
+            />
+          )}
+
           {/* Rejilla de referencia y contornos de los 4 bloques */}
           <CircleMarker center={[500, 500]} radius={8} pathOptions={{ color: '#3b82f6', fillOpacity: 0.2 }} />
 
@@ -220,6 +349,45 @@ export default function MapaCentro({ onSeleccionarEspacio, rutaActiva = [], onCa
               }}
             />
           )}
+
+          {/* Marcadores de incidencias activas en esta planta */}
+          {incidencias
+            .filter((inc) => inc.planta === plantaSeleccionada && inc.coord_x !== null && inc.coord_y !== null)
+            .map((inc) => (
+              <Marker
+                key={`incidencia-marcador-${inc.id}`}
+                position={[inc.coord_y, inc.coord_x]}
+                icon={iconoMarcadorIncidencia}
+              >
+                <Popup>
+                  <div style={{ color: '#0f172a', padding: '4px', minWidth: '180px' }}>
+                    <div style={{
+                      backgroundColor: '#fee2e2',
+                      color: '#991b1b',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      marginBottom: '6px'
+                    }}>
+                      🚨 Incidencia Activa
+                    </div>
+                    <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', textTransform: 'capitalize' }}>
+                      {inc.tipo.replace('_', ' ')}
+                    </h4>
+                    <p style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: '#475569' }}>
+                      <strong>Ubicación:</strong> {inc.nombre_espacio} (Planta {inc.planta})
+                    </p>
+                    {inc.descripcion && (
+                      <p style={{ margin: '4px 0 0', fontSize: '0.85rem', fontStyle: 'italic', color: '#334155' }}>
+                        "{inc.descripcion}"
+                      </p>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
 
           {/* Marcadores de los espacios en la planta activa */}
           {espaciosFiltrados.map((espacio) => {
@@ -283,6 +451,91 @@ export default function MapaCentro({ onSeleccionarEspacio, rutaActiva = [], onCa
             );
           })}
         </MapContainer>
+      )}
+
+      {/* Barra inferior de confirmación en modo reporte táctil */}
+      {modoReporte && (
+        <div style={{
+          position: 'absolute',
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1000,
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          backdropFilter: 'blur(8px)',
+          border: '2px solid var(--color-peligro)',
+          borderRadius: 'var(--radio-borde)',
+          padding: '16px 24px',
+          boxShadow: 'var(--sombra-panel)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '20px',
+          maxWidth: '92%',
+          minWidth: '340px'
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, color: 'var(--color-peligro)', fontSize: '1.05rem' }}>
+              {puntoReporte
+                ? `📍 Chincheta fijada en (${puntoReporte.coord_x}, ${puntoReporte.coord_y})`
+                : '👉 Toca la pantalla táctil en el punto exacto'}
+            </div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--texto-secundario)', marginTop: '4px' }}>
+              {puntoReporte && espacioCercano
+                ? `Espacio más cercano: ${espacioCercano.espacio.nombre} (Planta ${plantaSeleccionada})`
+                : 'Pulsa con el dedo en la zona donde está la barrera o avería'}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              type="button"
+              disabled={!puntoReporte}
+              onClick={() => {
+                if (puntoReporte && onConfirmarReporte) {
+                  onConfirmarReporte({
+                    tipo: tipoIncidenciaAReportar,
+                    coord_x: puntoReporte.coord_x,
+                    coord_y: puntoReporte.coord_y,
+                    id_espacio: espacioCercano?.espacio?.id || espaciosFiltrados[0]?.id
+                  });
+                  setPuntoReporte(null);
+                }
+              }}
+              className="boton-tactil"
+              style={{
+                backgroundColor: puntoReporte ? 'var(--color-peligro)' : '#475569',
+                color: '#ffffff',
+                fontWeight: 700,
+                padding: '10px 20px',
+                borderRadius: '8px',
+                cursor: puntoReporte ? 'pointer' : 'not-allowed',
+                border: 'none',
+                fontSize: '1rem'
+              }}
+            >
+              Confirmar Incidencia
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setPuntoReporte(null);
+                if (onCancelarReporte) onCancelarReporte();
+              }}
+              style={{
+                backgroundColor: 'transparent',
+                border: '1px solid var(--borde-suave)',
+                color: 'var(--texto-atenuado)',
+                padding: '10px 16px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

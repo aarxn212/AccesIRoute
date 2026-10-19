@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import MapaCentro from './componentes/MapaCentro';
 import ModalRuta from './componentes/ModalRuta';
+import ModalReportar from './componentes/ModalReportar';
 
 function App() {
   const [conexionApi, setConexionApi] = useState('Verificando...');
@@ -9,6 +10,13 @@ function App() {
   const [modalRutaAbierto, setModalRutaAbierto] = useState(false);
   const [resultadoRuta, setResultadoRuta] = useState(null);
 
+  // Estados para el reporte colaborativo táctil estilo Waze
+  const [modalReportarAbierto, setModalReportarAbierto] = useState(false);
+  const [modoReporte, setModoReporte] = useState(false);
+  const [tipoIncidenciaAReportar, setTipoIncidenciaAReportar] = useState(null);
+  const [actualizadorIncidencias, setActualizadorIncidencias] = useState(0);
+  const [notificacion, setNotificacion] = useState(null);
+
   useEffect(() => {
     // Comprobar la conexión con el backend
     fetch('http://localhost:3001/api/health')
@@ -16,6 +24,46 @@ function App() {
       .then((data) => setConexionApi(`Conectado (${data.project})`))
       .catch(() => setConexionApi('Backend desconectado'));
   }, []);
+
+  const manejarSeleccionarTipo = (tipo) => {
+    setTipoIncidenciaAReportar(tipo);
+    setModalReportarAbierto(false);
+    setModoReporte(true);
+  };
+
+  const manejarConfirmarReporte = async ({ tipo, coord_x, coord_y, id_espacio }) => {
+    try {
+      const res = await fetch('http://localhost:3001/api/incidencias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_espacio,
+          tipo,
+          coord_x,
+          coord_y,
+          descripcion: `Incidencia táctil (${tipo}) reportada en quiosco`
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('Error al registrar la incidencia en el servidor');
+      }
+
+      setModoReporte(false);
+      setTipoIncidenciaAReportar(null);
+      setActualizadorIncidencias((prev) => prev + 1);
+      setNotificacion('✅ Incidencia reportada con éxito y añadida al mapa.');
+      setTimeout(() => setNotificacion(null), 5000);
+    } catch (err) {
+      console.error('Error al reportar incidencia:', err);
+      alert('No se pudo registrar la incidencia. Por favor, inténtalo de nuevo.');
+    }
+  };
+
+  const manejarCancelarReporte = () => {
+    setModoReporte(false);
+    setTipoIncidenciaAReportar(null);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
@@ -41,6 +89,7 @@ function App() {
 
           <button
             type="button"
+            onClick={() => setModalReportarAbierto(true)}
             className="boton-tactil boton-reportar"
             aria-label="Reportar incidencia rápida"
           >
@@ -56,6 +105,11 @@ function App() {
           onSeleccionarEspacio={(espacio) => setEspacioSeleccionado(espacio)}
           rutaActiva={resultadoRuta?.ruta || []}
           onCargarEspacios={(lista) => setEspacios(lista)}
+          modoReporte={modoReporte}
+          tipoIncidenciaAReportar={tipoIncidenciaAReportar}
+          onConfirmarReporte={manejarConfirmarReporte}
+          onCancelarReporte={manejarCancelarReporte}
+          actualizadorIncidencias={actualizadorIncidencias}
         />
 
         {/* Panel inferior con la explicación de la ruta calculada por la IA */}
@@ -172,6 +226,29 @@ function App() {
             </div>
           </aside>
         )}
+        {/* Notificación flotante de confirmación tras reporte */}
+        {notificacion && (
+          <aside
+            role="status"
+            style={{
+              position: 'absolute',
+              top: '16px',
+              left: '16px',
+              zIndex: 1100,
+              backgroundColor: 'rgba(15, 23, 42, 0.95)',
+              border: '2px solid #10b981',
+              color: '#ffffff',
+              padding: '12px 20px',
+              borderRadius: 'var(--radio-borde)',
+              boxShadow: 'var(--sombra-panel)',
+              maxWidth: '460px',
+              fontSize: '0.95rem',
+              fontWeight: 600
+            }}
+          >
+            {notificacion}
+          </aside>
+        )}
       </main>
 
       {/* Modal táctil de búsqueda de rutas */}
@@ -180,6 +257,13 @@ function App() {
         onCerrar={() => setModalRutaAbierto(false)}
         espacios={espacios}
         onRutaCalculada={(ruta) => setResultadoRuta(ruta)}
+      />
+
+      {/* Modal táctil de reporte estilo Waze */}
+      <ModalReportar
+        abierto={modalReportarAbierto}
+        onCerrar={() => setModalReportarAbierto(false)}
+        onSeleccionarTipo={manejarSeleccionarTipo}
       />
     </div>
   );
