@@ -10,23 +10,21 @@ const LIMITES_PLANO = [
   [DIMENSION_PLANO, DIMENSION_PLANO]
 ];
 
-// Helper para recentrar el mapa cuando cambia la planta
 function ControladorPlano({ planta }) {
-  const map = useMap();
+  const mapa = useMap();
   useEffect(() => {
-    map.invalidateSize();
-  }, [planta, map]);
+    mapa.invalidateSize();
+  }, [planta, mapa]);
   return null;
 }
 
-// Detector táctil para colocar la chincheta en modo reporte
 function DetectorDeToques({ modoReporte, onCoordenadasSeleccionadas }) {
   useMapEvents({
-    click(e) {
+    click(evento) {
       if (modoReporte) {
         onCoordenadasSeleccionadas({
-          coord_y: Math.round(e.latlng.lat),
-          coord_x: Math.round(e.latlng.lng)
+          coord_y: Math.round(evento.latlng.lat),
+          coord_x: Math.round(evento.latlng.lng)
         });
       }
     }
@@ -165,15 +163,14 @@ export default function MapaCentro({
 }) {
   const [espacios, setEspacios] = useState([]);
   const [incidencias, setIncidencias] = useState([]);
-  const [plantaSeleccionada, setPlantaSeleccionada] = useState(1); // 1 = Baja, 2 = Alta
+  const [plantaSeleccionada, setPlantaSeleccionada] = useState(1);
   const [cargando, setCargando] = useState(true);
-  const [puntoReporte, setPuntoReporte] = useState(null); // { coord_x, coord_y }
+  const [puntoReporte, setPuntoReporte] = useState(null);
 
-  // Cargar espacios e incidencias desde la API REST
   useEffect(() => {
     Promise.all([
-      fetch('http://localhost:3001/api/espacios').then((r) => r.json()),
-      fetch('http://localhost:3001/api/incidencias').then((r) => r.json())
+      fetch('http://localhost:3001/api/espacios').then((respuesta) => respuesta.json()),
+      fetch('http://localhost:3001/api/incidencias').then((respuesta) => respuesta.json())
     ])
       .then(([datosEspacios, datosIncidencias]) => {
         setEspacios(datosEspacios);
@@ -181,50 +178,47 @@ export default function MapaCentro({
         setIncidencias(datosIncidencias);
         setCargando(false);
       })
-      .catch((err) => {
-        console.error('Error al cargar datos del mapa:', err);
+      .catch((error) => {
+        console.error('Error al cargar datos del mapa:', error);
         setCargando(false);
       });
   }, [onCargarEspacios, actualizadorIncidencias]);
 
-  // Limpiar punto al salir del modo reporte
   useEffect(() => {
     if (!modoReporte) {
       setPuntoReporte(null);
     }
   }, [modoReporte]);
 
-  // Si se calcula una nueva ruta, sintonizar la planta del punto de inicio
+  // Si hay una ruta activa, cambiamos a la planta donde empieza
   useEffect(() => {
     if (rutaActiva && rutaActiva.length > 0 && espacios.length > 0) {
-      const primerEspacio = espacios.find((e) => e.id === rutaActiva[0]);
+      const primerEspacio = espacios.find((espacio) => espacio.id === rutaActiva[0]);
       if (primerEspacio && primerEspacio.planta) {
         setPlantaSeleccionada(primerEspacio.planta);
       }
     }
   }, [rutaActiva, espacios]);
 
-  // Filtrar espacios según la planta activa en el selector
   const espaciosFiltrados = espacios.filter(
-    (e) => e.planta === plantaSeleccionada && e.coord_x !== null && e.coord_y !== null
+    (espacio) => espacio.planta === plantaSeleccionada && espacio.coord_x !== null && espacio.coord_y !== null
   );
 
-  // Espacio más cercano a la chincheta pulsada
+  // Calculamos el espacio mas proximo a la posicion pulsada
   const espacioCercano = puntoReporte
-    ? espaciosFiltrados.reduce((masCercano, esp) => {
-        const dist = Math.hypot(esp.coord_x - puntoReporte.coord_x, esp.coord_y - puntoReporte.coord_y);
-        if (!masCercano || dist < masCercano.dist) {
-          return { espacio: esp, dist };
+    ? espaciosFiltrados.reduce((masCercano, espacio) => {
+        const distancia = Math.hypot(espacio.coord_x - puntoReporte.coord_x, espacio.coord_y - puntoReporte.coord_y);
+        if (!masCercano || distancia < masCercano.distancia) {
+          return { espacio, distancia };
         }
         return masCercano;
       }, null)
     : null;
 
-  // Coordenadas consecutivas para dibujar el camino en la planta activa
   const coordenadasRutaEnPlanta = rutaActiva
-    .map((id) => espacios.find((e) => e.id === id))
-    .filter((e) => e && e.planta === plantaSeleccionada && e.coord_x !== null && e.coord_y !== null)
-    .map((e) => [e.coord_y, e.coord_x]);
+    .map((id) => espacios.find((espacio) => espacio.id === id))
+    .filter((espacio) => espacio && espacio.planta === plantaSeleccionada && espacio.coord_x !== null && espacio.coord_y !== null)
+    .map((espacio) => [espacio.coord_y, espacio.coord_x]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>

@@ -8,28 +8,27 @@ import rutasNavegacion from './rutas/rutas.js';
 
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 3001;
+const servidor = express();
+const puerto = process.env.PORT || process.env.PUERTO || 3001;
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
+servidor.use(cors());
+servidor.use(express.json());
 
-// Rutas
-app.use('/api/espacios', rutasEspacios);
-app.use('/api/conexiones', rutasConexiones);
-app.use('/api/incidencias', rutasIncidencias);
-app.use('/api/rutas', rutasNavegacion);
+servidor.use('/api/espacios', rutasEspacios);
+servidor.use('/api/conexiones', rutasConexiones);
+servidor.use('/api/incidencias', rutasIncidencias);
+servidor.use('/api/rutas', rutasNavegacion);
 
-// Endpoint de comprobación
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
+// Comprobacion rapida de que la API esta levantada
+servidor.get('/api/health', (peticion, respuesta) => {
+  respuesta.json({
+    estado: 'ok',
+    proyecto: 'AccessiRoute API',
     project: 'AccessiRoute API',
-    timestamp: new Date().toISOString()
+    fecha: new Date().toISOString()
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor AccessiRoute escuchando en http://localhost:${PORT}`);
+servidor.listen(puerto, () => {
+  console.log(`Servidor AccessiRoute escuchando en http://localhost:${puerto}`);
 });

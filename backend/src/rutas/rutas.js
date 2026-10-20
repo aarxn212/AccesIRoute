@@ -1,15 +1,15 @@
 import { Router } from 'express';
 import { calcularRutaConIA } from '../servicios/iaRutas.js';
 
-const router = Router();
+const enrutador = Router();
 
-// POST /api/rutas/consultar - Proponer una ruta asistida por Gemini IA
-router.post('/consultar', async (req, res) => {
-  const { peticionUsuario = '', idOrigen = null, idDestino = null, soloAccesible = false } = req.body;
+// Endpoint para pedir a la IA que calcule una ruta adaptada
+enrutador.post('/consultar', async (peticion, respuesta) => {
+  const { peticionUsuario = '', idOrigen = null, idDestino = null, soloAccesible = false } = peticion.body;
 
   if (!peticionUsuario && (!idOrigen || !idDestino)) {
-    return res.status(400).json({
-      error: 'Debes indicar una petición en texto/voz o seleccionar origen y destino.'
+    return respuesta.status(400).json({
+      error: 'Debes indicar una peticion en texto o seleccionar origen y destino'
     });
   }
 
@@ -21,13 +21,13 @@ router.post('/consultar', async (req, res) => {
       soloAccesible
     });
 
-    res.json(rutaCalculada);
+    respuesta.json(rutaCalculada);
   } catch (error) {
     console.error('Error al calcular ruta con IA:', error);
-    res.status(500).json({
-      error: error.message || 'Error al procesar la ruta con IA'
+    respuesta.status(500).json({
+      error: error.message || 'Error al procesar la ruta con el motor de IA'
     });
   }
 });
 
-export default router;
+export default enrutador;

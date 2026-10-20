@@ -18,10 +18,9 @@ function App() {
   const [notificacion, setNotificacion] = useState(null);
 
   useEffect(() => {
-    // Comprobar la conexión con el backend
     fetch('http://localhost:3001/api/health')
-      .then((res) => res.json())
-      .then((data) => setConexionApi(`Conectado (${data.project})`))
+      .then((respuesta) => respuesta.json())
+      .then((datos) => setConexionApi(`Conectado (${datos.proyecto || datos.project})`))
       .catch(() => setConexionApi('Backend desconectado'));
   }, []);
 
@@ -33,7 +32,7 @@ function App() {
 
   const manejarConfirmarReporte = async ({ tipo, coord_x, coord_y, id_espacio }) => {
     try {
-      const res = await fetch('http://localhost:3001/api/incidencias', {
+      const respuesta = await fetch('http://localhost:3001/api/incidencias', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -45,17 +44,17 @@ function App() {
         })
       });
 
-      if (!res.ok) {
+      if (!respuesta.ok) {
         throw new Error('Error al registrar la incidencia en el servidor');
       }
 
       setModoReporte(false);
       setTipoIncidenciaAReportar(null);
-      setActualizadorIncidencias((prev) => prev + 1);
+      setActualizadorIncidencias((anterior) => anterior + 1);
       setNotificacion('Incidencia reportada con éxito y añadida al mapa.');
       setTimeout(() => setNotificacion(null), 5000);
-    } catch (err) {
-      console.error('Error al reportar incidencia:', err);
+    } catch (error) {
+      console.error('Error al reportar incidencia:', error);
       alert('No se pudo registrar la incidencia. Por favor, inténtalo de nuevo.');
     }
   };

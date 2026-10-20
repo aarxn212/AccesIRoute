@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { pool } from '../db/conexion.js';
 
-const router = Router();
+const enrutador = Router();
 
-// GET /api/conexiones - Obtener el grafo completo de conexiones entre espacios
-router.get('/', async (req, res) => {
+// Devuelve el grafo de conexiones entre aulas y pasillos
+enrutador.get('/', async (peticion, respuesta) => {
   try {
-    const consulta = `
+    const consultaSql = `
       SELECT 
         c.id,
         c.id_espacio_origen,
@@ -29,12 +29,12 @@ router.get('/', async (req, res) => {
       ORDER BY c.id ASC;
     `;
 
-    const { rows } = await pool.query(consulta);
-    res.json(rows);
+    const { rows: conexiones } = await pool.query(consultaSql);
+    respuesta.json(conexiones);
   } catch (error) {
     console.error('Error al obtener conexiones:', error);
-    res.status(500).json({ error: 'Error interno al consultar las conexiones' });
+    respuesta.status(500).json({ error: 'Error al consultar las conexiones del grafo' });
   }
 });
 
-export default router;
+export default enrutador;

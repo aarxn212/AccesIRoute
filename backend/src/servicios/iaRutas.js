@@ -33,15 +33,8 @@ const esquemaRespuestaRuta = {
   required: ['origen', 'destino', 'ruta', 'barreras_evitadas', 'motivo']
 };
 
-/**
- * Calcula una ruta adaptada usando Gemini API basándose en el grafo de PostgreSQL
- * @param {string} peticionUsuario - Petición en lenguaje natural del usuario (ej: "Quiero ir de la entrada al aula A-12 en silla de ruedas")
- * @param {string} idOrigenForzado - (Opcional) Si el usuario o panel fija un origen
- * @param {string} idDestinoForzado - (Opcional) Si el usuario fija un destino
- * @param {boolean} soloAccesible - Si el usuario requiere movilidad reducida / sin barreras
- */
 export async function calcularRutaConIA({ peticionUsuario, idOrigenForzado = null, idDestinoForzado = null, soloAccesible = false }) {
-  // 1. Obtener datos actualizados de PostgreSQL
+  // Consultamos el estado actual del centro en la base de datos
   const { rows: espacios } = await pool.query(
     'SELECT id, nombre, bloque, planta, tipo, es_accesible FROM espacios ORDER BY id ASC;'
   );
@@ -51,21 +44,21 @@ export async function calcularRutaConIA({ peticionUsuario, idOrigenForzado = nul
   );
 
   const { rows: incidenciasActivas } = await pool.query(
-    'SELECT id_espacio, tipo, descripcion FROM incidencias WHERE estado = \'activa\';'
+    "SELECT id_espacio, tipo, descripcion FROM incidencias WHERE estado = 'activa';"
   );
 
-  // 2. Comprobar API Key
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === 'tu_api_key_de_gemini') {
-    throw new Error('Debes configurar GEMINI_API_KEY en el archivo backend/.env para utilizar el motor de rutas con IA.');
+  const claveApi = process.env.GEMINI_API_KEY;
+  if (!claveApi || claveApi === 'tu_api_key_de_gemini') {
+    throw new Error('Falta configurar la variable GEMINI_API_KEY en backend/.env');
   }
 
-  // 3. Construir contexto del prompt
-  const ai = new GoogleGenAI({ apiKey });
+  const clienteGemini = new GoogleGenAI({ apiKey: claveApi });
 
-  const idsIncidencias = incidenciasActivas.map((i) => `${i.id_espacio} (${i.tipo}: ${i.descripcion || 'bloqueado'})`).join(', ');
+  const textoIncidencias = incidenciasActivas
+    .map((inc) => `${inc.id_espacio} (${inc.tipo}: ${inc.descripcion || 'bloqueado'})`)
+    .join(', ');
 
-  const promptSistema = `
+  const instrucciones = `
 Eres el motor de navegación accesible de un centro educativo para la aplicación "AccessiRoute".
 Tu misión es interpretar la petición del usuario y devolver una RUTA VÁLIDA paso a paso utilizando EXCLUSIVAMENTE los nodos y conexiones del instituto suministrados abajo.
 
@@ -76,7 +69,7 @@ REGLAS ESTRICTAS DE NAVEGACIÓN:
    - ESTÁ TOTALMENTE PROHIBIDO utilizar conexiones con "es_accesible: false" (como escaleras).
    - DEBES utilizar el ascensor o rampas para subir o bajar de planta.
 4. INCIDENCIAS ACTIVAS BLOQUEADAS:
-   - Los siguientes espacios tienen incidencias y NO PUEDEN transitarse: [${idsIncidencias || 'Ninguna incidencia activa'}].
+   - Los siguientes espacios tienen incidencias y NO PUEDEN transitarse: [${textoIncidencias || 'Ninguna incidencia activa'}].
    - Si un ascensor tiene una incidencia, busca una ruta alternativa o infórmalo si el destino es inalcanzable.
 5. Si idOrigen o idDestino vienen fijados, respétalos. Si no, dedúcelos del texto del usuario.
 
@@ -94,32 +87,33 @@ ${idDestinoForzado ? `Destino fijado: ${idDestinoForzado}` : ''}
 ${soloAccesible ? 'Requisito: Movilidad reducida estricta (solo rutas accesibles).' : ''}
 `;
 
-  const modelosAIntentar = [
+  // Probamos con modelos alternativos si la API tiene saturacion en alguno
+  const modelosDisponibles = [
     process.env.GEMINI_MODEL || 'gemini-3.5-flash',
     'gemini-3.7-flash',
     'gemini-3.8-flash'
   ];
 
-  let ultimoError = null;
+  let ultimoFallo = null;
 
-  for (const modelo of modelosAIntentar) {
+  for (const modelo of modelosDisponibles) {
     try {
-      const respuesta = await ai.models.generateContent({
+      const respuesta = await clienteGemini.models.generateContent({
         model: modelo,
-        contents: promptSistema,
+        contents: instrucciones,
         config: {
           responseMimeType: 'application/json',
           responseSchema: esquemaRespuestaRuta,
-          temperature: 0.1 // Baja temperatura para garantizar fidelidad al grafo sin inventar
+          temperature: 0.1
         }
       });
 
       return JSON.parse(respuesta.text);
     } catch (error) {
       console.warn(`Aviso: Error con modelo ${modelo}, probando siguiente alternativa...`, error.message);
-      ultimoError = error;
+      ultimoFallo = error;
     }
   }
 
-  throw ultimoError || new Error('No se pudo calcular la ruta con ningún modelo de IA disponible');
+  throw ultimoFallo || new Error('No se pudo calcular la ruta con ningún modelo de IA disponible');
 }

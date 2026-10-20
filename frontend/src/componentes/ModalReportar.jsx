@@ -67,19 +67,18 @@ export default function ModalReportar({ abierto, onCerrar, onSeleccionarTipo }) 
           </button>
         </div>
 
-        {/* Cuadrícula táctil rápida con los 6 tipos */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-          {TIPOS_INCIDENCIA.map((t) => (
+          {TIPOS_INCIDENCIA.map((tipo) => (
             <button
-              key={t.id}
+              key={tipo.id}
               type="button"
-              onClick={() => onSeleccionarTipo(t.id)}
+              onClick={() => onSeleccionarTipo(tipo.id)}
               className="boton-tactil"
               style={{
                 minHeight: '64px',
                 padding: '14px 18px',
                 backgroundColor: 'var(--fondo-elevado)',
-                border: `2px solid ${t.color}`,
+                border: `2px solid ${tipo.color}`,
                 color: 'var(--texto-principal)',
                 display: 'flex',
                 alignItems: 'center',
@@ -93,11 +92,11 @@ export default function ModalReportar({ abierto, onCerrar, onSeleccionarTipo }) 
                 width: '16px',
                 height: '16px',
                 borderRadius: '50%',
-                backgroundColor: t.color,
+                backgroundColor: tipo.color,
                 display: 'inline-block',
-                boxShadow: `0 0 8px ${t.color}`
+                boxShadow: `0 0 8px ${tipo.color}`
               }} aria-hidden="true" />
-              <span style={{ fontWeight: 700 }}>{t.nombre}</span>
+              <span style={{ fontWeight: 700 }}>{tipo.nombre}</span>
             </button>
           ))}
         </div>

@@ -10,15 +10,14 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
 
   if (!abierto) return null;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const manejarEnvio = async (evento) => {
+    evento.preventDefault();
     setError(null);
     setCargando(true);
 
     try {
       const respuesta = await fetch('http://localhost:3001/api/rutas/consultar', {
         method: 'POST',
-        H: { 'Content-Type': 'application/json' },
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           peticionUsuario: peticionTexto,
@@ -36,9 +35,9 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
 
       onRutaCalculada(datos);
       onCerrar();
-    } catch (err) {
-      console.error('Error al consultar ruta:', err);
-      setError(err.message);
+    } catch (error) {
+      console.error('Error al consultar ruta:', error);
+      setError(error.message);
     } finally {
       setCargando(false);
     }
@@ -112,18 +111,17 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Entrada de lenguaje natural */}
+        <form onSubmit={manejarEnvio} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
             <label htmlFor="peticion-ia" style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
-              ¿A dónde quieres ir? (Habla o escribe de forma natural):
+              ¿A dónde quieres ir? (Escribe de forma natural):
             </label>
             <input
               id="peticion-ia"
               type="text"
               placeholder="Ej: Estoy en recepción y quiero ir al aula A-04 sin escaleras"
               value={peticionTexto}
-              onChange={(e) => setPeticionTexto(e.target.value)}
+              onChange={(evento) => setPeticionTexto(evento.target.value)}
               style={{
                 width: '100%',
                 minHeight: '48px',
@@ -138,7 +136,6 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
             />
           </div>
 
-          {/* Opciones directas de origen y destino */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label htmlFor="select-origen" style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', color: 'var(--texto-secundario)' }}>
@@ -147,7 +144,7 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
               <select
                 id="select-origen"
                 value={idOrigen}
-                onChange={(e) => setIdOrigen(e.target.value)}
+                onChange={(evento) => setIdOrigen(evento.target.value)}
                 style={{
                   width: '100%',
                   minHeight: '44px',
@@ -159,9 +156,9 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
                 }}
               >
                 <option value="">Dedúzcalo la IA</option>
-                {espacios.map((e) => (
-                  <option key={`orig-${e.id}`} value={e.id}>
-                    {e.nombre} ({e.bloque} - P{e.planta})
+                {espacios.map((esp) => (
+                  <option key={`orig-${esp.id}`} value={esp.id}>
+                    {esp.nombre} ({esp.bloque} - P{esp.planta})
                   </option>
                 ))}
               </select>
@@ -174,7 +171,7 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
               <select
                 id="select-destino"
                 value={idDestino}
-                onChange={(e) => setIdDestino(e.target.value)}
+                onChange={(evento) => setIdDestino(evento.target.value)}
                 style={{
                   width: '100%',
                   minHeight: '44px',
@@ -186,16 +183,15 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
                 }}
               >
                 <option value="">Dedúzcalo la IA</option>
-                {espacios.map((e) => (
-                  <option key={`dest-${e.id}`} value={e.id}>
-                    {e.nombre} ({e.bloque} - P{e.planta})
+                {espacios.map((esp) => (
+                  <option key={`dest-${esp.id}`} value={esp.id}>
+                    {esp.nombre} ({esp.bloque} - P{esp.planta})
                   </option>
                 ))}
               </select>
             </div>
           </div>
 
-          {/* Interruptor de accesibilidad táctil */}
           <label
             style={{
               display: 'flex',
@@ -211,7 +207,7 @@ export default function ModalRuta({ abierto, onCerrar, espacios = [], onRutaCalc
             <input
               type="checkbox"
               checked={soloAccesible}
-              onChange={(e) => setSoloAccesible(e.target.checked)}
+              onChange={(evento) => setSoloAccesible(evento.target.checked)}
               style={{ width: '24px', height: '24px', cursor: 'pointer' }}
             />
             <span style={{ fontSize: '1rem', fontWeight: 600 }}>

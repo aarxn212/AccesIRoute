@@ -1,17 +1,16 @@
 import { Router } from 'express';
 import { pool } from '../db/conexion.js';
 
-const router = Router();
+const enrutador = Router();
 
-// Tipos permitidos según el requerimiento de Waze
 const TIPOS_VALIDOS = ['obstaculo', 'ascensor', 'puerta', 'rampa', 'paso_bloqueado', 'otro'];
 
-// GET /api/incidencias - Listar incidencias (por defecto activas)
-router.get('/', async (req, res) => {
-  const { estado = 'activa' } = req.query;
+// Lista incidencias (por defecto las activas para el mapa y la IA)
+enrutador.get('/', async (peticion, respuesta) => {
+  const { estado = 'activa' } = peticion.query;
 
   try {
-    let consulta = `
+    let consultaSql = `
       SELECT 
         i.id,
         i.id_espacio,
@@ -28,105 +27,103 @@ router.get('/', async (req, res) => {
       JOIN espacios e ON i.id_espacio = e.id
     `;
 
-    const params = [];
+    const parametros = [];
     if (estado !== 'todas') {
-      consulta += ' WHERE i.estado = $1';
-      params.push(estado);
+      consultaSql += ' WHERE i.estado = $1';
+      parametros.push(estado);
     }
 
-    consulta += ' ORDER BY i.creado_en DESC;';
+    consultaSql += ' ORDER BY i.creado_en DESC;';
 
-    const { rows } = await pool.query(consulta, params);
-    res.json(rows);
+    const { rows: incidencias } = await pool.query(consultaSql, parametros);
+    respuesta.json(incidencias);
   } catch (error) {
     console.error('Error al obtener incidencias:', error);
-    res.status(500).json({ error: 'Error interno al consultar incidencias' });
+    respuesta.status(500).json({ error: 'Error al consultar las incidencias' });
   }
 });
 
-// POST /api/incidencias - Crear reporte rápido de incidencia (estilo Waze)
-router.post('/', async (req, res) => {
-  const { id_espacio, tipo, descripcion = '', coord_x = null, coord_y = null } = req.body;
+// Registra un nuevo reporte tactil estilo Waze
+enrutador.post('/', async (peticion, respuesta) => {
+  const { id_espacio, tipo, descripcion = '', coord_x = null, coord_y = null } = peticion.body;
 
-  // Validación básica
   if (!id_espacio || !tipo) {
-    return res.status(400).json({ error: 'id_espacio y tipo son obligatorios' });
+    return respuesta.status(400).json({ error: 'Falta indicar el espacio y el tipo de problema' });
   }
 
   if (!TIPOS_VALIDOS.includes(tipo)) {
-    return res.status(400).json({ 
-      error: `Tipo no válido. Debe ser uno de: ${TIPOS_VALIDOS.join(', ')}` 
+    return respuesta.status(400).json({ 
+      error: `Tipo no valido. Debe ser: ${TIPOS_VALIDOS.join(', ')}` 
     });
   }
 
   try {
-    // Comprobar que el espacio existe
     const espacioExiste = await pool.query('SELECT id FROM espacios WHERE id = $1', [id_espacio]);
     if (espacioExiste.rows.length === 0) {
-      return res.status(404).json({ error: 'El espacio indicado no existe' });
+      return respuesta.status(404).json({ error: 'El espacio indicado no existe' });
     }
 
-    const consulta = `
+    const consultaSql = `
       INSERT INTO incidencias (id_espacio, tipo, descripcion, estado, coord_x, coord_y)
       VALUES ($1, $2, $3, 'activa', $4, $5)
       RETURNING *;
     `;
 
-    const { rows } = await pool.query(consulta, [id_espacio, tipo, descripcion, coord_x, coord_y]);
-    res.status(201).json({
+    const { rows: resultado } = await pool.query(consultaSql, [id_espacio, tipo, descripcion, coord_x, coord_y]);
+    respuesta.status(201).json({
       mensaje: 'Incidencia reportada correctamente',
-      incidencia: rows[0]
+      incidencia: resultado[0]
     });
   } catch (error) {
     console.error('Error al crear incidencia:', error);
-    res.status(500).json({ error: 'Error interno al registrar la incidencia' });
+    respuesta.status(500).json({ error: 'Error al registrar la incidencia' });
   }
 });
 
-// PATCH /api/incidencias/:id/resolver - Marcar una incidencia como resuelta
-router.patch('/:id/resolver', async (req, res) => {
-  const { id } = req.params;
+// Marca una incidencia como solucionada
+enrutador.patch('/:id/resolver', async (peticion, respuesta) => {
+  const { id } = peticion.params;
 
   try {
-    const consulta = `
+    const consultaSql = `
       UPDATE incidencias 
       SET estado = 'resuelta' 
       WHERE id = $1 
       RETURNING *;
     `;
 
-    const { rows } = await pool.query(consulta, [id]);
+    const { rows: resultado } = await pool.query(consultaSql, [id]);
 
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Incidencia no encontrada' });
+    if (resultado.length === 0) {
+      return respuesta.status(404).json({ error: 'Incidencia no encontrada' });
     }
 
-    res.json({
+    respuesta.json({
       mensaje: 'Incidencia marcada como resuelta',
-      incidencia: rows[0]
+      incidencia: resultado[0]
     });
   } catch (error) {
     console.error(`Error al resolver incidencia ${id}:`, error);
-    res.status(500).json({ error: 'Error interno al resolver la incidencia' });
+    respuesta.status(500).json({ error: 'Error al resolver la incidencia' });
   }
 });
 
-// DELETE /api/incidencias/:id - Eliminar incidencia (administración)
-router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
+// Elimina una incidencia
+enrutador.delete('/:id', async (peticion, respuesta) => {
+  const { id } = peticion.params;
 
   try {
-    const { rows } = await pool.query('DELETE FROM incidencias WHERE id = $1 RETURNING *;', [id]);
+    const { rows: resultado } = await pool.query('DELETE FROM incidencias WHERE id = $1 RETURNING *;', [id]);
 
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Incidencia no encontrada' });
+    if (resultado.length === 0) {
+      return respuesta.status(404).json({ error: 'Incidencia no encontrada' });
     }
 
-    res.json({ mensaje: 'Incidencia eliminada correctamente' });
+    respuesta.json({ mensaje: 'Incidencia eliminada correctamente' });
   } catch (error) {
     console.error(`Error al eliminar incidencia ${id}:`, error);
-    res.status(500).json({ error: 'Error interno al eliminar la incidencia' });
+    respuesta.status(500).json({ error: 'Error al eliminar la incidencia' });
   }
 });
 
-export default router;
+export default enrutador;

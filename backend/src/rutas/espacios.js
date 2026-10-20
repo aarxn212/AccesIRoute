@@ -1,39 +1,39 @@
 import { Router } from 'express';
 import { pool } from '../db/conexion.js';
 
-const router = Router();
+const enrutador = Router();
 
-// GET /api/espacios - Listar todos los espacios del centro educativo
-router.get('/', async (req, res) => {
+// Devuelve todos los espacios ordenados por bloque y planta
+enrutador.get('/', async (peticion, respuesta) => {
   try {
-    const { rows } = await pool.query(
+    const { rows: espacios } = await pool.query(
       'SELECT id, nombre, bloque, planta, tipo, es_accesible, coord_x, coord_y FROM espacios ORDER BY bloque, planta, nombre ASC'
     );
-    res.json(rows);
+    respuesta.json(espacios);
   } catch (error) {
     console.error('Error al obtener los espacios:', error);
-    res.status(500).json({ error: 'Error interno al consultar los espacios' });
+    respuesta.status(500).json({ error: 'Error al consultar los espacios en la base de datos' });
   }
 });
 
-// GET /api/espacios/:id - Obtener el detalle de un espacio por su identificador
-router.get('/:id', async (req, res) => {
-  const { id } = req.params;
+// Busca un espacio concreto por su identificador
+enrutador.get('/:id', async (peticion, respuesta) => {
+  const { id } = peticion.params;
   try {
-    const { rows } = await pool.query(
+    const { rows: resultado } = await pool.query(
       'SELECT id, nombre, bloque, planta, tipo, es_accesible, coord_x, coord_y FROM espacios WHERE id = $1',
       [id]
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Espacio no encontrado' });
+    if (resultado.length === 0) {
+      return respuesta.status(404).json({ error: 'Espacio no encontrado' });
     }
 
-    res.json(rows[0]);
+    respuesta.json(resultado[0]);
   } catch (error) {
     console.error(`Error al obtener el espacio ${id}:`, error);
-    res.status(500).json({ error: 'Error interno al consultar el espacio' });
+    respuesta.status(500).json({ error: 'Error al consultar el espacio' });
   }
 });
 
-export default router;
+export default enrutador;
